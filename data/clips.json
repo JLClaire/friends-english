@@ -1,16 +1,9 @@
 [
   {
-    "id": "clip1",
-    "title": "Clip 1",
-    "videoSrc": "./assets/videos/clip1.mp4",
-    "enVtt": "./assets/subtitles/clip1.en.vtt",
-    "lines": [
-      { "start": 0.2, "end": 2.8, "zh": "没什么好说的！", "en": "There's nothing to tell!" },
-      { "start": 3.0, "end": 5.2, "zh": "他只是我同事而已。", "en": "He's just some guy I work with." }
-    ],
-    "highlights": [
-      { "type": "phrase", "en": "There's nothing to tell!", "zh": "没什么好说的！", "note": "用来结束话题/表示没啥可讲" },
-      { "type": "phrase", "en": "some guy I work with", "zh": "我一个同事", "note": "弱化关系，很口语" }
-    ]
+    "id": "s01e01_c1",
+    "title": "S01E01 Clip 1",
+    "videoSrc": "./assets/videos/s01e01_c1.mp4",
+    "linesSrc": "./data/s01e01_c1.json",
+    "highlights": []
   }
 ]
