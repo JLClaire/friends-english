@@ -1,7 +1,7 @@
 const clipSelect = document.getElementById("clipSelect");
 const stepLabel = document.getElementById("stepLabel");
 const mediaHint = document.getElementById("mediaHint");
-
+const speedSelect = document.getElementById("speedSelect");
 const video = document.getElementById("video");
 const audio = document.getElementById("audio");
 
@@ -162,6 +162,9 @@ async function loadClipById(id) {
 
   // media
   video.src = currentClip.videoSrc;
+  const rate = Number(speedSelect.value || 1);
+video.playbackRate = rate;
+audio.playbackRate = rate;
   if (currentClip.audioSrc) {
     audio.src = currentClip.audioSrc;
     audio.classList.remove("hidden");
@@ -182,7 +185,11 @@ async function loadClipById(id) {
   renderTranslate();
   renderReview();
 }
-
+speedSelect.addEventListener("change", () => {
+  const rate = Number(speedSelect.value);
+  video.playbackRate = rate;
+  audio.playbackRate = rate;
+});
 async function init() {
   const res = await fetch("./data/clips.json");
   clips = await res.json();
