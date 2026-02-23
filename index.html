@@ -9,18 +9,21 @@
 <body>
   <header class="header">
     <h1>Clip Trainer</h1>
+
     <div class="row">
       <select id="clipSelect"></select>
       <span id="stepLabel" class="pill"></span>
-    </div>
-    <label class="hint">Speed:</label>
-<select id="speedSelect">
-  <option value="0.75">0.75×</option>
-  <option value="1" selected>1×</option>
-  <option value="1.25">1.25×</option>
-  <option value="1.5">1.5×</option>
-  <option value="2">2×</option>
-</select>
+
+      <div class="speed-control">
+  <span class="speed-label">Playback Speed</span>
+  <select id="speedSelect" class="speed-select">
+    <option value="0.75">0.75×</option>
+    <option value="1" selected>1×</option>
+    <option value="1.25">1.25×</option>
+    <option value="1.5">1.5×</option>
+    <option value="2">2×</option>
+  </select>
+</div>
   </header>
 
   <main class="grid">
@@ -42,30 +45,31 @@
       </div>
 
       <div id="step2" class="panel hidden">
-        <div class="hint">Step 2：你可以点击任意一句跳转到对应时间，进行 shadowing（影子跟读）。建议：先 0.75× 听清，再 1× 跟读。
-          ① 先不看中文，点句子跳转播放，跟读模仿语音语调；
-          ② 英文默认显示，用来校准你听到的内容；
-          ③ 看不懂再点 ZH 显示中文确认语义，然后立刻隐藏中文再跟读一次。
-          这样做的原因：优先训练听力与输出，不让中文抢先“替你理解”。
-          单句模式下用 ← / → 切换上一句/下一句跟读（也可使用键盘）</div>
+        <div class="hint">
+          你可以点击任意一句跳转到对应时间，进行 shadowing（影子跟读）。建议：先 0.75× 听清，再 1× 跟读。<br>
+          ① 先不看中文，点句子跳转播放，跟读模仿语音语调； <br>
+          ② 英文默认显示，用来校准你听到的内容； <br>
+          ③ 看不懂再点 ZH 显示中文确认语义，然后立刻隐藏中文再跟读一次。 <br>
+          这样做的原因：优先训练听力与输出，不让中文抢先“替你理解”。 <br>
+          单句模式下用 ← / → 切换上一句/下一句跟读（也可使用键盘）
+        </div>
+
         <div class="row" style="margin-top:10px;">
-    <button id="viewListBtn" type="button" class="primary">List View</button>
-    <button id="viewSingleBtn" type="button">Single View</button>
+          <button id="viewListBtn" type="button" class="primary">List View</button>
+          <button id="viewSingleBtn" type="button">Single View</button>
 
-    <label class="hint" style="margin-left:10px;">ZH</label>
-    <button id="toggleZhBtn" type="button">ZH Show</button>
-  </div>
+          <label class="hint" style="margin-left:10px;">ZH</label>
+          <button id="toggleZhBtn" type="button">ZH Show</button>
+        </div>
 
-  <!-- 单句视图控制条 -->
-  <div id="singleBar" class="row hidden" style="margin-top:10px; justify-content:space-between;">
-    <button id="prevLineBtn" type="button">← Prev</button>
-    <div id="singleText" style="flex:1; margin:0 10px;"></div>
-    <button id="nextLineBtn" type="button">Next →</button>
-  </div>
+        <div id="singleBar" class="row hidden" style="margin-top:10px; justify-content:space-between;">
+          <button id="prevLineBtn" type="button">← Prev</button>
+          <div id="singleText" style="flex:1; margin:0 10px;"></div>
+          <button id="nextLineBtn" type="button">Next →</button>
+        </div>
 
-  <!-- 列表视图容器 -->
-  <div id="subs"></div>
-</div>
+        <div id="subs"></div>
+      </div>
 
       <div id="step3" class="panel hidden">
         <div class="hint">Step 3：逐句中译英（显示中文提示，填写英文）</div>
