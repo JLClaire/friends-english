@@ -60,38 +60,69 @@ function saveAnswers(arr) {
 
 function renderSubs() {
   subsEl.innerHTML = "";
+
   lines.forEach((ln, i) => {
     const div = document.createElement("div");
     div.className = "item";
+
+    // 默认：英文显示，中文隐藏
     div.innerHTML = `
       <div class="meta">${ln.start}s → ${ln.end}s</div>
-      <div class="en">${ln.en || ""}</div>
-      ${ln.zh ? `<div class="zh">${ln.zh}</div>` : ""}
+
+      <div class="row" style="justify-content:space-between; margin-top:6px;">
+        <div class="en" data-en style="margin:0;">${ln.en || ""}</div>
+        <div class="row" style="gap:8px;">
+          <button type="button" data-toggle-en style="padding:6px 10px;">EN Hide</button>
+          <button type="button" data-toggle-zh style="padding:6px 10px;">ZH Show</button>
+        </div>
+      </div>
+
+      <div class="zh hidden" data-zh>${ln.zh || "（该句暂无中文提示）"}</div>
     `;
-    div.onclick = () => {
+
+    // 点击整行：跳转播放（但点按钮不触发跳转）
+    div.addEventListener("click", (e) => {
+      const t = e.target;
+      if (t && (t.matches("button") || t.closest("button"))) return;
       video.currentTime = ln.start;
       video.play();
-    };
+    });
+
+    // 切换英文显示/隐藏
+    const enEl = div.querySelector("[data-en]");
+    const btnEn = div.querySelector("[data-toggle-en]");
+    btnEn.addEventListener("click", () => {
+      const isHidden = enEl.classList.toggle("hidden");
+      btnEn.textContent = isHidden ? "EN Show" : "EN Hide";
+    });
+
+    // 切换中文显示/隐藏（默认隐藏）
+    const zhEl = div.querySelector("[data-zh]");
+    const btnZh = div.querySelector("[data-toggle-zh]");
+    btnZh.addEventListener("click", () => {
+      const isHidden = zhEl.classList.toggle("hidden");
+      btnZh.textContent = isHidden ? "ZH Show" : "ZH Hide";
+    });
+
     subsEl.appendChild(div);
   });
 
+  // 播放时高亮 + 自动滚动（不影响隐藏逻辑）
   video.ontimeupdate = () => {
-  const t = video.currentTime;
-  let activeIndex = -1;
+    const t = video.currentTime;
+    let activeIndex = -1;
 
-  lines.forEach((ln, i) => {
-    const el = subsEl.children[i];
-    const active = (t >= ln.start && t <= ln.end);
-    el.style.background = active ? "#f2f2f2" : "#fff";
-    if (active) activeIndex = i;
-  });
+    lines.forEach((ln, i) => {
+      const el = subsEl.children[i];
+      const active = (t >= ln.start && t <= ln.end);
+      el.style.background = active ? "#f2f2f2" : "#fff";
+      if (active) activeIndex = i;
+    });
 
-  // 自动滚动到当前句（只在找到当前句时触发）
-  if (activeIndex >= 0) {
-    const activeEl = subsEl.children[activeIndex];
-    activeEl.scrollIntoView({ behavior: "smooth", block: "center" });
-  }
-};
+    if (activeIndex >= 0) {
+      subsEl.children[activeIndex].scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
 }
 
 function renderTranslate() {
