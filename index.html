@@ -1,1 +1,250 @@
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Clip Trainer</title>
+  <style>
+    :root { --b:#e6e6e6; --m:#666; }
+    *{ box-sizing:border-box; }
+    body{ font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; margin:0; color:#111; }
+    header{ padding:16px 20px; border-bottom:1px solid var(--b); }
+    h1{ margin:0 0 6px 0; font-size:20px; }
+    .meta{ color:var(--m); display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .pill{ border:1px solid var(--b); border-radius:999px; padding:2px 10px; font-size:12px; }
+    main{ max-width:1000px; margin:0 auto; padding:18px; display:grid; grid-template-columns:1.4fr 1fr; gap:16px; }
+    @media(max-width:900px){ main{ grid-template-columns:1fr; } }
+    .card{ border:1px solid var(--b); border-radius:14px; padding:12px; }
+    video{ width:100%; border-radius:10px; background:#000; }
+    .nav{ display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+    button{ padding:10px 12px; border:1px solid var(--b); border-radius:10px; background:#fff; cursor:pointer; }
+    button.primary{ background:#111; color:#fff; border-color:#111; }
+    button:disabled{ opacity:.5; cursor:not-allowed; }
+    .hint{ color:var(--m); font-size:12px; margin-top:8px; }
+    .hidden{ display:none; }
 
+    .line{ border:1px solid var(--b); border-radius:12px; padding:10px; margin-top:10px; }
+    .t{ color:var(--m); font-size:12px; }
+    .zh{ margin-top:6px; background:#fafafa; border:1px solid var(--b); padding:8px; border-radius:10px; }
+    textarea{ width:100%; margin-top:8px; border:1px solid var(--b); border-radius:10px; padding:10px; font-size:14px; }
+    .ans{ margin-top:8px; border:1px solid var(--b); border-radius:10px; padding:10px; white-space:pre-wrap; }
+    .label{ font-size:12px; color:var(--m); margin:8px 0 6px; }
+    .hl{ border:1px solid var(--b); border-radius:12px; padding:10px; margin-top:10px; }
+    .hl .en{ font-weight:700; margin-top:6px; }
+    .hl .note{ color:var(--m); font-size:13px; margin-top:6px; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Friends Clip Trainer</h1>
+  <div class="meta">
+    <span id="clipTitle"></span>
+    <span id="stepPill" class="pill"></span>
+  </div>
+</header>
+
+<main>
+  <section class="card">
+    <video id="video" controls preload="metadata" playsinline></video>
+    <div class="hint" id="subHint">Step 2 会显示英文字幕（看不到的话点播放器的字幕/CC按钮）</div>
+  </section>
+
+  <section class="card">
+    <div class="nav">
+      <button id="prevBtn" disabled>Prev</button>
+      <button id="nextBtn" class="primary">Next</button>
+      <button id="resetBtn">Reset</button>
+    </div>
+
+    <!-- Step 3：逐句中译英 -->
+    <div id="translatePanel" class="hidden">
+      <div class="label">逐句中译英（按句输入）</div>
+      <div id="lines"></div>
+    </div>
+
+    <!-- Step 4：对照 + 精华 -->
+    <div id="reviewPanel" class="hidden">
+      <div class="label">参考对照（你的答案 vs 参考答案）</div>
+      <div id="review"></div>
+
+      <div class="label" style="margin-top:14px;">精华短语/单词</div>
+      <div id="highlights"></div>
+    </div>
+
+    <div class="hint" style="margin-top:10px;">
+      Step1 无字幕 → Step2 英文字幕 → Step3 逐句中译英 → Step4 对照与总结
+    </div>
+  </section>
+</main>
+
+<script>
+const video = document.getElementById("video");
+const clipTitle = document.getElementById("clipTitle");
+const stepPill = document.getElementById("stepPill");
+const subHint = document.getElementById("subHint");
+
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+const resetBtn = document.getElementById("resetBtn");
+
+const translatePanel = document.getElementById("translatePanel");
+const linesEl = document.getElementById("lines");
+const reviewPanel = document.getElementById("reviewPanel");
+const reviewEl = document.getElementById("review");
+const highlightsEl = document.getElementById("highlights");
+
+let clips = [];
+let clipIdx = 0;
+let step = 0; // 0 no sub, 1 en sub, 2 translate, 3 review
+
+const STEP_TEXT = [
+  "Step 1/4: No subtitles",
+  "Step 2/4: English subtitles",
+  "Step 3/4: CN → EN (line by line)",
+  "Step 4/4: Review + Highlights"
+];
+
+function clearTracks(){
+  [...video.querySelectorAll("track")].forEach(t => t.remove());
+}
+function enableEnglishSub(vttUrl){
+  clearTracks();
+  const track = document.createElement("track");
+  track.kind = "subtitles";
+  track.label = "English";
+  track.srclang = "en";
+  track.src = vttUrl;
+  track.default = true;
+  video.appendChild(track);
+  track.addEventListener("load", () => {
+    try { track.track.mode = "showing"; } catch {}
+  });
+}
+function disableSub(){ clearTracks(); }
+
+function saveUserAnswers(clip){
+  const inputs = [...document.querySelectorAll("textarea[data-line-idx]")];
+  const answers = inputs.map(t => t.value);
+  localStorage.setItem("answers:" + clip.id, JSON.stringify(answers));
+}
+function loadUserAnswers(clip){
+  const raw = localStorage.getItem("answers:" + clip.id);
+  if (!raw) return [];
+  try { return JSON.parse(raw); } catch { return []; }
+}
+
+function renderTranslateUI(clip){
+  const saved = loadUserAnswers(clip);
+  linesEl.innerHTML = "";
+  clip.lines.forEach((ln, i) => {
+    const div = document.createElement("div");
+    div.className = "line";
+    div.innerHTML = `
+      <div class="t">${ln.start}s → ${ln.end}s</div>
+      <div class="zh">${ln.zh}</div>
+      <textarea rows="2" data-line-idx="${i}" placeholder="写你的英文翻译…"></textarea>
+    `;
+    const ta = div.querySelector("textarea");
+    ta.value = saved[i] || "";
+    ta.addEventListener("input", () => saveUserAnswers(clip));
+    div.addEventListener("dblclick", () => { video.currentTime = ln.start; video.play(); });
+    linesEl.appendChild(div);
+  });
+}
+
+function renderReviewUI(clip){
+  const saved = loadUserAnswers(clip);
+  reviewEl.innerHTML = "";
+  clip.lines.forEach((ln, i) => {
+    const div = document.createElement("div");
+    div.className = "line";
+    div.innerHTML = `
+      <div class="t">${ln.start}s → ${ln.end}s</div>
+      <div class="label">你的翻译</div>
+      <div class="ans">${(saved[i] || "（未填写）").replaceAll("<","&lt;")}</div>
+      <div class="label">参考答案</div>
+      <div class="ans">${ln.en.replaceAll("<","&lt;")}</div>
+    `;
+    div.addEventListener("dblclick", () => { video.currentTime = ln.start; video.play(); });
+    reviewEl.appendChild(div);
+  });
+
+  highlightsEl.innerHTML = "";
+  (clip.highlights || []).forEach(h => {
+    const div = document.createElement("div");
+    div.className = "hl";
+    div.innerHTML = `
+      <div class="t">${h.type || "highlight"}</div>
+      <div class="en">${h.en || ""}</div>
+      <div>${h.zh || ""}</div>
+      <div class="note">${h.note || ""}</div>
+    `;
+    highlightsEl.appendChild(div);
+  });
+}
+
+function render(){
+  const clip = clips[clipIdx];
+  clipTitle.textContent = clip.title;
+  stepPill.textContent = STEP_TEXT[step];
+
+  if (video.getAttribute("data-src") !== clip.videoSrc){
+    video.src = clip.videoSrc;
+    video.setAttribute("data-src", clip.videoSrc);
+  }
+
+  prevBtn.disabled = step === 0;
+  nextBtn.disabled = step === 3;
+
+  translatePanel.classList.toggle("hidden", step !== 2);
+  reviewPanel.classList.toggle("hidden", step !== 3);
+
+  if (step === 1){
+    subHint.textContent = "已启用英文字幕（看不到字幕就点视频播放器字幕/CC按钮）";
+    enableEnglishSub(clip.enVtt);
+  } else {
+    subHint.textContent = "Step 2 会显示英文字幕（看不到的话点播放器的字幕/CC按钮）";
+    disableSub();
+  }
+
+  if (step === 2) renderTranslateUI(clip);
+  if (step === 3) renderReviewUI(clip);
+}
+
+function next(){
+  const clip = clips[clipIdx];
+  if (step === 2){
+    // 可选：要求至少写一条
+    const saved = loadUserAnswers(clip);
+    const hasAny = saved.some(x => (x || "").trim().length > 0);
+    if (!hasAny){
+      alert("至少先写一句你的翻译再 Next（随便写也行）");
+      return;
+    }
+  }
+  step = Math.min(3, step + 1);
+  render();
+}
+function prev(){
+  step = Math.max(0, step - 1);
+  render();
+}
+function resetAll(){
+  const clip = clips[clipIdx];
+  localStorage.removeItem("answers:" + clip.id);
+  step = 0;
+  render();
+}
+
+prevBtn.onclick = prev;
+nextBtn.onclick = next;
+resetBtn.onclick = resetAll;
+
+(async function init(){
+  const res = await fetch("./data/clips.json");
+  clips = await res.json();
+  render();
+})();
+</script>
+</body>
+</html>
