@@ -44,7 +44,7 @@ let lines = [];
 let step = 0;
 
 // Step2 view
-let viewMode = "list";     // "list" | "single"
+let viewMode = "single";    // "list" | "single"
 let showZh = false;        // 中文默认隐藏
 let activeIndex = 0;       // single view 当前句
 let segmentEnd = null;     // 单句播放到点自动暂停（仅当通过 playSegment 播放时生效）
@@ -271,6 +271,7 @@ async function loadClipById(id) {
   toggleZhBtn.textContent = "ZH Show";
   activeIndex = 0;
   segmentEnd = null;
+  viewMode = "single"; 
 
   // keep viewMode as user last choice, but ensure UI reflects it
   setVisible();
