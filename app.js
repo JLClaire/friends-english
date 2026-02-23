@@ -76,12 +76,22 @@ function renderSubs() {
   });
 
   video.ontimeupdate = () => {
-    const t = video.currentTime;
-    lines.forEach((ln, i) => {
-      const el = subsEl.children[i];
-      el.style.background = (t >= ln.start && t <= ln.end) ? "#f2f2f2" : "#fff";
-    });
-  };
+  const t = video.currentTime;
+  let activeIndex = -1;
+
+  lines.forEach((ln, i) => {
+    const el = subsEl.children[i];
+    const active = (t >= ln.start && t <= ln.end);
+    el.style.background = active ? "#f2f2f2" : "#fff";
+    if (active) activeIndex = i;
+  });
+
+  // 自动滚动到当前句（只在找到当前句时触发）
+  if (activeIndex >= 0) {
+    const activeEl = subsEl.children[activeIndex];
+    activeEl.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+};
 }
 
 function renderTranslate() {
@@ -193,7 +203,13 @@ async function init() {
   }
 }
 
-prevBtn.onclick = () => { step = Math.max(0, step - 1); setVisible(); };
+prevBtn.onclick = () => {
+  step = Math.max(0, step - 1);
+  setVisible();
+  if (step === 1) renderSubs();
+  if (step === 2) renderTranslate();
+  if (step === 3) renderReview();
+};
 nextBtn.onclick = () => {
   if (step === 2) {
     const a = loadAnswers();
@@ -205,6 +221,9 @@ nextBtn.onclick = () => {
   }
   step = Math.min(3, step + 1);
   setVisible();
+  if (step === 1) renderSubs();
+  if (step === 2) renderTranslate();
+  if (step === 3) renderReview();
 };
 resetBtn.onclick = () => {
   localStorage.removeItem(`answers:${currentClip.id}`);
