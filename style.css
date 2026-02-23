@@ -19,3 +19,37 @@ button.primary{ background:#111; color:#fff; border-color:#111; }
 .en{ font-weight:700; margin-top:6px; }
 .zh{ margin-top:6px; background:#fafafa; border:1px solid var(--b); padding:8px; border-radius:10px; }
 textarea{ width:100%; margin-top:8px; border:1px solid var(--b); border-radius:10px; padding:10px; font-size:14px; }
+/* ===== Speed Control 强化样式 ===== */
+
+.speed-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 15px;
+}
+
+.speed-label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+.speed-select {
+  font-size: 16px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 2px solid #111;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.speed-select:hover {
+  background-color: #f2f2f2;
+}
+
+.speed-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.2);
+}
