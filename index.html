@@ -46,9 +46,26 @@
           ① 先不看中文，点句子跳转播放，跟读模仿语音语调；
           ② 英文默认显示，用来校准你听到的内容；
           ③ 看不懂再点 ZH 显示中文确认语义，然后立刻隐藏中文再跟读一次。
-          这样做的原因：优先训练听力与输出，不让中文抢先“替你理解”。</div>
-        <div id="subs"></div>
-      </div>
+          这样做的原因：优先训练听力与输出，不让中文抢先“替你理解”。
+          单句模式下用 ← / → 切换上一句/下一句跟读（也可使用键盘）</div>
+        <div class="row" style="margin-top:10px;">
+    <button id="viewListBtn" type="button" class="primary">List View</button>
+    <button id="viewSingleBtn" type="button">Single View</button>
+
+    <label class="hint" style="margin-left:10px;">ZH</label>
+    <button id="toggleZhBtn" type="button">ZH Show</button>
+  </div>
+
+  <!-- 单句视图控制条 -->
+  <div id="singleBar" class="row hidden" style="margin-top:10px; justify-content:space-between;">
+    <button id="prevLineBtn" type="button">← Prev</button>
+    <div id="singleText" style="flex:1; margin:0 10px;"></div>
+    <button id="nextLineBtn" type="button">Next →</button>
+  </div>
+
+  <!-- 列表视图容器 -->
+  <div id="subs"></div>
+</div>
 
       <div id="step3" class="panel hidden">
         <div class="hint">Step 3：逐句中译英（显示中文提示，填写英文）</div>
