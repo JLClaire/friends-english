@@ -7,3 +7,10 @@
     "highlights": []
   }
 ]
+
+{
+  "id": "s01e01_c2",
+  "title": "S01E01 Clip 2",
+  "videoSrc": "./assets/videos/s01e01_c2.mp4",
+  "linesSrc": "./data/s01e01_c2.json"
+}
