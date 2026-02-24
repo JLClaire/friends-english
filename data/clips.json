@@ -11,5 +11,11 @@
     "title": "S01E01 Clip 2",
     "videoSrc": "./assets/videos/s01e01_c2.mp4",
     "linesSrc": "./data/s01e01_c2.json"
+  },
+  {
+"id": "s01e01_c3",
+"title": "Friends S01E01 Clip 3",
+"videoSrc": "./assets/videos/s01e01_c3.mp4",
+"linesSrc": "./data/s01e01_c3.json"
   }
 ]
